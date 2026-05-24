@@ -31,7 +31,7 @@ DCCClient::DCCClient(std::map<int, TurnoutController *> *turnoutControllers) : W
     {
         Serial.println("[Connected to DCC-EX Command Station!]");
 
-        this->print("<=>");
+        this->println("<=>");
         Serial.println("Sent Command: <=> (Request Track Manager Configuration)");
     }
     else
@@ -149,7 +149,7 @@ void DCCClient::checkConnected()
         if (this->connect(dcc_ip, dcc_port))
         {
             Serial.println("[Reconnected to DCC-EX!]");
-            this->print("<=>");
+            this->println("<=>");
             Serial.println("Sent Command: <=> (Request Track Manager Configuration)");
         }
     }
