@@ -3,7 +3,7 @@
 #define TURNOUT_CONTROLLER_H
 
 // Do not set this high or you will electrocute your turnout!
-#define TU_POWER_TIME 30
+#define TU_POWER_TIME 50
 
 class TurnoutController
 {
