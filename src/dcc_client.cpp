@@ -1,8 +1,14 @@
-#include "dcc_client.h"
-#include "config.h"
+#include <map>
 
-DCCClient::DCCClient() : WiFiClient()
+#include "config.h"
+#include "common.h"
+#include "dcc_client.h"
+#include "turnoutController.h"
+
+DCCClient::DCCClient(std::map<int, TurnoutController *> *turnoutControllers) : WiFiClient()
 {
+    _turnoutControllers = turnoutControllers;
+
     Serial.println("\n--- Connecting to Wi-Fi ---");
     // Start the Wi-Fi connection process
     WiFi.begin(ssid, password);
@@ -56,7 +62,26 @@ void DCCClient::handleTurnoutMessage(String params)
     int turnoutID = params.substring(0, spaceIndex).toInt();
     int state = params.substring(spaceIndex + 1).toInt();
 
-    Serial.printf("[Turnout Update] ID: %d | State: %d\n", turnoutID, state);
+    if(_turnoutControllers->find(turnoutID) == _turnoutControllers->end()) {
+        Serial.printf("[Turnout Error] No turnout controller found for ID: %d\n", turnoutID);
+        return;
+    }
+
+    if(_turnoutControllers->at(turnoutID)->getState() != state) {
+        if (state == TU_CLOSE)
+        {
+            _turnoutControllers->at(turnoutID)->setClose();
+        }
+        else if (state == TU_THROWN)
+        {
+            _turnoutControllers->at(turnoutID)->setThrown();
+        }
+        else
+        {
+            Serial.printf("[Turnout Error] Invalid state value for turnout ID %d: %d\n", turnoutID, state);
+            return;
+        }
+    }
 }
 
 void DCCClient::handleTrackManagerMessage(String params)

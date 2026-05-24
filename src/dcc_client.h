@@ -4,11 +4,14 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
+#include "turnoutController.h"
+
 class DCCClient : public WiFiClient {
     public:
-        DCCClient();
+        DCCClient(std::map<int, TurnoutController *> *turnoutControllers);
         void checkMessages();
     private:
+        std::map<int, TurnoutController *> *_turnoutControllers;
         String _rxBuffer = "";
         void checkConnected();
         void parseDCCMessage(String msg);
