@@ -25,6 +25,8 @@ DCCClient::DCCClient(std::map<int, TurnoutController *> *turnoutControllers) : W
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
 
+    WiFi.setSleep(false);
+
     // Connect to DCC-EX Command Station TCP Server
     Serial.printf("Attempting link to DCC-EX at %s:%d...\n", dcc_ip, dcc_port);
     if (connect(dcc_ip, dcc_port))
