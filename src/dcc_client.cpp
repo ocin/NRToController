@@ -29,6 +29,7 @@ DCCClient::DCCClient(std::map<int, TurnoutController *> *turnoutControllers) : W
     Serial.printf("Attempting link to DCC-EX at %s:%d...\n", dcc_ip, dcc_port);
     if (connect(dcc_ip, dcc_port))
     {
+        setNoDelay(true); 
         Serial.println("[Connected to DCC-EX Command Station!]");
 
         this->println("<=>");
