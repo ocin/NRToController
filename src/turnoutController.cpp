@@ -14,7 +14,7 @@ TurnoutController::TurnoutController(int id, int closedPort, int thrownPort, int
 
     _state = state;
 
-    Serial.println((String)"Init turnout controller \"" + _id + "\"");
+    Serial.printf("[Turnout Init] Initialize turnout controller \"%d\"\n", _id);
 
     if(_state == TU_CLOSE) {
         setClose();
@@ -26,7 +26,7 @@ TurnoutController::TurnoutController(int id, int closedPort, int thrownPort, int
 void TurnoutController::setClose() {
     _state = TU_CLOSE;
 
-    Serial.println((String)"Update turnout controller \"" + _id + "\" to CLOSE");
+    Serial.printf("[Turnout Update] Update turnout controller \"%d\" to CLOSE\n", _id);
 
     digitalWrite(_closedPort, HIGH);
     delay(TU_POWER_TIME);
@@ -36,7 +36,7 @@ void TurnoutController::setClose() {
 void TurnoutController::setThrown() {
     _state = TU_THROWN;
 
-    Serial.println((String)"Update turnout controller \"" + _id + "\" to THROWN");
+    Serial.printf("[Turnout Update] Update turnout controller \"%d\" to THROWN\n", _id);
 
     digitalWrite(_thrownPort, HIGH);
     delay(TU_POWER_TIME);

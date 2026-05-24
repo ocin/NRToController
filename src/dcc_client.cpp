@@ -41,34 +41,33 @@ DCCClient::DCCClient(std::map<int, TurnoutController *> *turnoutControllers) : W
     }
 }
 
-// Params string here contains everything after "H ", like "101 1"
-void DCCClient::handleTurnoutMessage(String params)
+void DCCClient::handleTurnoutMessage(char* params)
 {
-    params.trim();
-    if (params.length() == 0)
+    // Check if the pointer is null or points to an empty string
+    if (params == NULL || *params == '\0')
     {
         Serial.println("[Turnout Error] params string is empty.");
         return;
     }
 
-    // Find the space separating the turnout ID and the state
-    int spaceIndex = params.indexOf(' ');
-    if (spaceIndex == -1)
+    int turnoutID = -1;
+    int state = -1;
+
+    // sscanf scans the string for two integers separated by a space.
+    // It returns the number of successfully matched arguments.
+    if (sscanf(params, "%d %d", &turnoutID, &state) != 2)
     {
-        Serial.println("[Turnout Error] Malformed parameters: missing state value.");
+        Serial.println("[Turnout Error] Malformed parameters: missing ID or state value.");
         return;
     }
 
-    // Extract id and state from the params string
-    int turnoutID = params.substring(0, spaceIndex).toInt();
-    int state = params.substring(spaceIndex + 1).toInt();
-
-    if(_turnoutControllers->find(turnoutID) == _turnoutControllers->end()) {
+    // Use the parsed integers directly with your map
+    if (_turnoutControllers->find(turnoutID) == _turnoutControllers->end()) {
         Serial.printf("[Turnout Error] No turnout controller found for ID: %d\n", turnoutID);
         return;
     }
 
-    if(_turnoutControllers->at(turnoutID)->getState() != state) {
+    if (_turnoutControllers->at(turnoutID)->getState() != state) {
         if (state == TU_CLOSE)
         {
             _turnoutControllers->at(turnoutID)->setClose();
@@ -85,58 +84,75 @@ void DCCClient::handleTurnoutMessage(String params)
     }
 }
 
-void DCCClient::handleTrackManagerMessage(String params)
+void DCCClient::handleTrackManagerMessage(char* params)
 {
     Serial.print("[Track Manager Event] Status: ");
-    Serial.println(params);
+    Serial.println(params ? params : "NONE");
 }
 
-void DCCClient::handleUnknownMessage(String cmd, String params)
+void DCCClient::handleUnknownMessage(const char* cmd, char* params)
 {
-    Serial.printf("[Unhandled DCC Msg] Cmd: %s | Params: %s\n", cmd.c_str(), params.c_str());
+    // %s natively accepts raw character pointers (char*)
+#ifdef DEBUG
+    Serial.printf("[Unhandled DCC Msg] Cmd: %s | Params: %s\n", 
+                  cmd ? cmd : "NONE", 
+                  params ? params : "NONE");
+#endif
 }
 
-void DCCClient::parseDCCMessage(String msg)
+void DCCClient::parseDCCMessage(char* msg)
 {
-    // Print the raw message to VS Code Serial Monitor for debugging
+    // 1. Debug Print using the raw character array (No String allocation)
+#ifdef DEBUG
     Serial.print("Received from DCC-EX: <");
     Serial.print(msg);
     Serial.println(">");
+#endif
 
-    msg.trim(); // Clean up trailing spaces or newlines
-    if (msg.length() == 0)
-        return;
+    // 2. Trim leading spaces manually if necessary (Usually not needed if using the previous fixed buffer)
+    while (*msg == ' ') {
+        msg++;
+    }
 
-    String cmd = "";
-    String params = "";
+    size_t len = strlen(msg);
+    if (len == 0) return;
 
-    // Find the first space separator
-    int firstSpace = msg.indexOf(' ');
+    // Trim trailing spaces in place
+    while (len > 0 && msg[len - 1] == ' ') {
+        msg[len - 1] = '\0';
+        len--;
+    }
 
-    if (firstSpace != -1)
+    char* cmd = msg;      // The command starts at the beginning of the string
+    char* params = NULL;  // Initialize parameters as empty/NULL
+
+    // 3. Find the first space separator using a fast pointer lookup
+    char* firstSpace = strchr(msg, ' ');
+
+    if (firstSpace != NULL)
     {
-        // Space found: split into command key and subsequent parameters
-        cmd = msg.substring(0, firstSpace);
-        params = msg.substring(firstSpace + 1);
+        *firstSpace = '\0';        // Split string in place by replacing space with null terminator
+        params = firstSpace + 1;   // Parameters start right after the old space character
+        
+        // Trim any extra leading spaces in the parameters block
+        while (*params == ' ') {
+            params++;
+        }
+    }
+
+    // 4. Route commands using fast pointer comparisons (strcmp)
+    if (strcmp(cmd, "H") == 0)
+    {
+        // If params is NULL, pass an empty string safely
+        handleTurnoutMessage(params ? params : (char*)"");
+    }
+    else if (strcmp(cmd, "=") == 0)
+    { 
+        handleTrackManagerMessage(params ? params : (char*)"");
     }
     else
     {
-        // No space found: the entire message is the command (e.g., "p1")
-        cmd = msg;
-    }
-
-    // Route based on the extracted multi-character command token
-    if (cmd == "H")
-    {
-        handleTurnoutMessage(params);
-    }
-    else if (cmd == "=")
-    { // Works for multi-character variations
-        handleTrackManagerMessage(params);
-    }
-    else
-    {
-        handleUnknownMessage(cmd, params);
+        handleUnknownMessage(cmd, params ? params : (char*)"");
     }
 }
 
@@ -160,29 +176,43 @@ void DCCClient::checkMessages()
 {
     checkConnected();
 
-    // Process characters only if they are actively waiting in the Wi-Fi buffer
-    while (available())
+    // Aggressively pull all waiting data out of the Wi-Fi chip buffer
+    while (available() > 0)
     {
         char c = read();
 
         if (c == '<')
         {
-            // Clear the buffer to prepare for a brand new message
-            _rxBuffer = "";
+            // Reset index instantly without touching heap memory
+            _rxIndex = 0; 
+            _rxBuffer[_rxIndex] = '\0';
         }
         else if (c == '>')
         {
-            // We found the end! Only now do we pass it to the parser
-            if (_rxBuffer.length() > 0)
+            // We found the end! Cap the string array and parse
+            if (_rxIndex > 0)
             {
-                parseDCCMessage(_rxBuffer);
-                _rxBuffer = ""; // Reset for the next packet
+                _rxBuffer[_rxIndex] = '\0'; // Properly terminate the C-string
+                parseDCCMessage(_rxBuffer);  // Update your parser to accept (char*)
+                _rxIndex = 0;               // Reset for next packet
             }
         }
         else
         {
-            // Content character: safely append it to our ongoing buffer
-            _rxBuffer += c;
+            // Filter out carriage returns, newlines, or spaces at the start
+            if (c != '\r' && c != '\n') 
+            {
+                // Safely append while guaranteeing we never overflow the array bounds
+                if (_rxIndex < MAX_MSG_LEN - 1)
+                {
+                    _rxBuffer[_rxIndex++] = c;
+                }
+                else
+                {
+                    // Buffer safety net: packet was too long/corrupt, dump it
+                    _rxIndex = 0;
+                }
+            }
         }
     }
 }

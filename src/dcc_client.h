@@ -12,12 +12,14 @@ class DCCClient : public WiFiClient {
         void checkMessages();
     private:
         std::map<int, TurnoutController *> *_turnoutControllers;
-        String _rxBuffer = "";
+        static const size_t MAX_MSG_LEN = 64; // DCC-EX commands rarely exceed 30 chars
+        char _rxBuffer[MAX_MSG_LEN];
+        size_t _rxIndex = 0;
         void checkConnected();
-        void parseDCCMessage(String msg);
-        void handleTurnoutMessage(String msg);
-        void handleTrackManagerMessage(String msg);
-        void handleUnknownMessage(String msg, String params);
+        void parseDCCMessage(char* msg);
+        void handleTurnoutMessage(char* params);
+        void handleTrackManagerMessage(char* params);
+        void handleUnknownMessage(const char* cmd, char* params);
 };
 
 #endif
