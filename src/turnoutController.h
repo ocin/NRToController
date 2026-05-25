@@ -8,15 +8,13 @@
 class TurnoutController
 {
     public:
-        TurnoutController(int, int, int, int); // id, closedPort, thrownPort, state
+        TurnoutController(int, int, int); // id, closedPort, thrownPort, state
         void setClose();
         void setThrown();
-        bool getState();
     private:
         int _id;
         int _closedPort;
         int _thrownPort;
-        int _state; 
 };
 
 #endif

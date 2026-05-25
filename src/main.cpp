@@ -1,27 +1,82 @@
+#include <DCCEXProtocol.h>
 #include <Arduino.h>
 #include <map>
+#include <WiFi.h>
 
-#include "common.h"
-#include "dcc_client.h"
-#include "turnoutController.h"
+#include "config.h"
+#include "TurnoutController.h"
+#include "TocDelegate.h"
 
-DCCClient *dcc_client;
+WiFiClient client;
+DCCEXProtocol dccexProtocol;
+TocDelegate tocDelegate;
 
 std::map<int, TurnoutController *> turnoutControllers;
 
-void setup() {
-  Serial.begin(115200);
-  delay(1000); 
-  Serial.println("ESP32 Serial Initialized!");
+void setup_wifi()
+{
+    Serial.println("\n--- Connecting to Wi-Fi ---");
+    // Start the Wi-Fi connection process
+    WiFi.begin(ssid, password);
 
-  turnoutControllers.insert(std::make_pair(101, new TurnoutController(101, 12, 13, TU_CLOSE)));
-  turnoutControllers.insert(std::make_pair(102, new TurnoutController(102, 16, 17, TU_THROWN)));
-  turnoutControllers.insert(std::make_pair(103, new TurnoutController(103, 18, 19, TU_THROWN)));
-  turnoutControllers.insert(std::make_pair(104, new TurnoutController(104, 21, 22, TU_CLOSE)));
+    // Wait until the ESP32 successfully connects
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        Serial.print("."); // Visual loading indicator
+    }
 
-  dcc_client = new DCCClient(&turnoutControllers);
+    // Connection successful
+    Serial.println("\nWi-Fi Connected!");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
 }
 
-void loop() {
-  dcc_client->checkMessages();
+void setup_dccex()
+{
+    int tolistretries = 0;
+
+    Serial.println("Connecting to the DCC-EX server...");
+    if (!client.connect(dcc_ip, dcc_port))
+    {
+        Serial.println("connection failed");
+        while (1)
+            delay(1000);
+    }
+    Serial.println("Connected to the DCC-EX server");
+
+    // Logging on Serial
+    dccexProtocol.setLogStream(&Serial);
+
+    // Pass the delegate instance to wiThrottleProtocol
+    dccexProtocol.setDelegate(&tocDelegate);
+
+    // Pass the communication to wiThrottleProtocol
+    dccexProtocol.connect(&client);
+    Serial.println("DCC-EX connected");
+
+    dccexProtocol.requestServerVersion();
+
+    dccexProtocol.getLists(false, true, false, false);
+}
+
+void setup()
+{
+    Serial.begin(115200);
+    delay(1000);
+    Serial.println("ESP32 Serial Initialized!");
+
+    setup_wifi();
+
+    setup_dccex();
+
+    turnoutControllers.insert(std::make_pair(101, new TurnoutController(101, 12, 13 )));
+    turnoutControllers.insert(std::make_pair(102, new TurnoutController(102, 16, 17)));
+    turnoutControllers.insert(std::make_pair(103, new TurnoutController(103, 18, 19)));
+    turnoutControllers.insert(std::make_pair(104, new TurnoutController(104, 21, 22)));
+}
+
+void loop()
+{
+    dccexProtocol.check();
 }
