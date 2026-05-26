@@ -11,8 +11,6 @@ WiFiClient client;
 DCCEXProtocol dccexProtocol;
 TocDelegate tocDelegate;
 
-bool turnoutsSetup = false;
-
 void setup_wifi()
 {
     WiFi.setSleep(false);
@@ -36,13 +34,14 @@ void setup_wifi()
 
 void setup_dccex()
 {
+    int tolistretries = 0;
+
     Serial.printf("Connecting to DCC-EX server %s:%d...\n", dcc_ip, dcc_port);
     while (!client.connect(dcc_ip, dcc_port))
     {
         Serial.printf("DCC-EX connection failed to %s:%d, retrying...\n", dcc_ip, dcc_port);
         delay(1000);
     }
-    client.setNoDelay(true);
 
     // Logging on Serial
     dccexProtocol.setLogStream(&Serial);
@@ -52,41 +51,20 @@ void setup_dccex()
 
     // Pass the communication to wiThrottleProtocol
     dccexProtocol.connect(&client);
+    client.setNoDelay(true);
     dccexProtocol.enableHeartbeat();
     Serial.printf("Connected to the DCC-EX server %s:%d\n", dcc_ip, dcc_port);
+
+    dccexProtocol.requestServerVersion();
+
+    dccexProtocol.getLists(false, true, false, false);
 }
 
-void setupTurnouts()
-{
-    dccexProtocol.getLists(false, true, false, false);
-
+void setupTurnouts() {
     TocIdMapList[0] = {101, new TurnoutController(101, 12, 13)};
     TocIdMapList[1] = {102, new TurnoutController(102, 16, 17)};
     TocIdMapList[2] = {103, new TurnoutController(103, 18, 19)};
     TocIdMapList[3] = {104, new TurnoutController(104, 21, 22)};
-
-    for (Turnout *turnout = dccexProtocol.turnouts->getFirst(); turnout; turnout = turnout->getNext())
-    {
-        int turnoutId = turnout->getId();
-        const char *name = turnout->getName();
-        bool state = turnout->getThrown();
-#ifdef DEBUG
-        Serial.print(turnoutId);
-        Serial.print(" name: ");
-        Serial.print(name);
-        Serial.print(" state: ");
-        Serial.println(state);
-#endif
-        if (state)
-        {
-            getTurnoutControllerById(turnoutId)->setThrown();
-        }
-        else
-        {
-            getTurnoutControllerById(turnoutId)->setClose();
-        }
-    }
-    dccexProtocol.clearAllLists();
 }
 
 void setup()
@@ -103,10 +81,4 @@ void setup()
 void loop()
 {
     dccexProtocol.check();
-
-    if (!turnoutsSetup && dccexProtocol.receivedLists())
-    {
-        setupTurnouts();
-        turnoutsSetup = true;
-    }
 }

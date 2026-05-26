@@ -8,7 +8,11 @@
 class TocDelegate : public DCCEXProtocolDelegate
 {
 public:
+    void receivedServerVersion(int major, int minor, int patch) override;
+    void receivedTurnoutList() override;
     void receivedTurnoutAction(int turnoutId, bool thrown) override;
+private:
+    void initTurnouts();
 };
 
 #endif
