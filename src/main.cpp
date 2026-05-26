@@ -15,6 +15,8 @@ std::map<int, TurnoutController *> turnoutControllers;
 
 void setup_wifi()
 {
+    WiFi.setSleep(false);
+
     Serial.println("\n--- Connecting to Wi-Fi ---");
     // Start the Wi-Fi connection process
     WiFi.begin(ssid, password);
@@ -53,6 +55,8 @@ void setup_dccex()
 
     // Pass the communication to wiThrottleProtocol
     dccexProtocol.connect(&client);
+    client.setNoDelay(true);
+    dccexProtocol.enableHeartbeat();
     Serial.println("DCC-EX connected");
 
     dccexProtocol.requestServerVersion();
