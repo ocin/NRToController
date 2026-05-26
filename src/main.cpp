@@ -36,14 +36,12 @@ void setup_dccex()
 {
     int tolistretries = 0;
 
-    Serial.println("Connecting to the DCC-EX server...");
-    if (!client.connect(dcc_ip, dcc_port))
+    Serial.printf("Connecting to DCC-EX server %s:%d...\n", dcc_ip, dcc_port);
+    while (!client.connect(dcc_ip, dcc_port))
     {
-        Serial.println("connection failed");
-        while (1)
-            delay(1000);
+        Serial.printf("DCC-EX connection failed to %s:%d, retrying...\n", dcc_ip, dcc_port);
+        delay(1000);
     }
-    Serial.println("Connected to the DCC-EX server");
 
     // Logging on Serial
     dccexProtocol.setLogStream(&Serial);
@@ -55,7 +53,7 @@ void setup_dccex()
     dccexProtocol.connect(&client);
     client.setNoDelay(true);
     dccexProtocol.enableHeartbeat();
-    Serial.println("DCC-EX connected");
+    Serial.printf("Connected to the DCC-EX server %s:%d\n", dcc_ip, dcc_port);
 
     dccexProtocol.requestServerVersion();
 
