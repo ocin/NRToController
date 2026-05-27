@@ -47,13 +47,10 @@ void setup_dccex()
         delay(1000);
     }
 
-    // Logging on Serial
     dccexProtocol.setLogStream(&Serial);
 
-    // Pass the delegate instance to wiThrottleProtocol
-    dccexProtocol.setDelegate(&tocDelegate);
+    //dccexProtocol.setDelegate(&tocDelegate);
 
-    // Pass the communication to wiThrottleProtocol
     dccexProtocol.connect(&client);
     client.setNoDelay(true);
     dccexProtocol.enableHeartbeat();
