@@ -1,6 +1,7 @@
 #include <DCCEXProtocol.h>
 #include <Arduino.h>
 #include <WiFi.h>
+#include <esp_wifi.h>
 
 #include "config.h"
 #include "TurnoutController.h"
@@ -13,7 +14,10 @@ TocDelegate tocDelegate;
 
 void setup_wifi()
 {
-    WiFi.setSleep(false);
+    esp_wifi_set_ps(WIFI_PS_NONE);
+
+    esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_11N);
+    esp_wifi_set_bandwidth(WIFI_IF_STA, WIFI_BW_HT20);
 
     Serial.println("\n--- Connecting to Wi-Fi ---");
     // Start the Wi-Fi connection process
@@ -60,7 +64,8 @@ void setup_dccex()
     dccexProtocol.getLists(false, true, false, false);
 }
 
-void setupTurnouts() {
+void setupTurnouts()
+{
     TocIdMapList[0] = {101, new TurnoutController(101, 12, 13)};
     TocIdMapList[1] = {102, new TurnoutController(102, 16, 17)};
     TocIdMapList[2] = {103, new TurnoutController(103, 18, 19)};
