@@ -1,9 +1,10 @@
+#include <map>
+
 #include "TocDelegate.h"
 #include "TurnoutController.h"
-#include "TocIdMap.h"
 #include "common.h"
 
-extern TocIdMap TocIdMapList[MAX_TURNOUTS];
+extern std::map<int, TurnoutController*> tocIdMap;
 
 void TocDelegate::receivedServerVersion(int major, int minor, int patch)
 {
@@ -32,11 +33,11 @@ void TocDelegate::receivedTurnoutAction(int turnoutId, bool thrown)
 #endif
     if (thrown)
     {
-        getTurnoutControllerById(turnoutId)->setThrown();
+        tocIdMap[turnoutId]->setThrown();
     }
     else
     {
-        getTurnoutControllerById(turnoutId)->setClose();
+        tocIdMap[turnoutId]->setClose();
     }
 }
 
@@ -56,11 +57,11 @@ void TocDelegate::initTurnouts()
 #endif
         if (state)
         {
-            getTurnoutControllerById(turnoutId)->setThrown();
+            tocIdMap[turnoutId]->setThrown();
         }
         else
         {
-            getTurnoutControllerById(turnoutId)->setClose();
+            tocIdMap[turnoutId]->setClose();
         }
     }
 }
