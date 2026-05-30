@@ -7,10 +7,14 @@
 #include "config.h"
 #include "TurnoutController.h"
 #include "TocDelegate.h"
+#include "colors.h"
+#include "rgb_led.h"
 
 WiFiClient client;
 DCCEXProtocol dccexProtocol;
 TocDelegate tocDelegate;
+
+RGBLed networkLed(25, 26, 27);
 
 std::map<int, TurnoutController*> tocIdMap;
 
@@ -36,6 +40,7 @@ void setup_wifi()
     Serial.println("\nWi-Fi Connected!");
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
+    networkLed.setColor(YELLOW);
 }
 
 void setup_dccex()
@@ -55,6 +60,7 @@ void setup_dccex()
     client.setNoDelay(true);
     dccexProtocol.enableHeartbeat();
     Serial.printf("Connected to the DCC-EX server %s:%d\n", dcc_ip, dcc_port);
+    networkLed.setColor(BLUE);
 
     dccexProtocol.requestServerVersion();
 
@@ -75,6 +81,8 @@ void setup()
     delay(1000);
     Serial.println("ESP32 Serial Initialized!");
 
+    networkLed.setColor(RED);
+
     setup_wifi();
     setup_dccex();
     setupTurnouts();
@@ -86,6 +94,7 @@ void loop()
 
     if(!client.connected()) {
         Serial.println("DCC-EX server connection lost, attempting to reconnect...");
+        networkLed.setColor(YELLOW);
         setup_dccex();
     }
 }
