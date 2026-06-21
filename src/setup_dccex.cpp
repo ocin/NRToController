@@ -1,9 +1,7 @@
 #include "setup_dccex.h"
 
-extern TocDelegate tocDelegate;
-extern RGBLed networkLed;
-extern DCCEXProtocol dccexProtocol;
-extern WiFiClient client;
+TocDelegate tocDelegate;
+DCCEXProtocol dccexProtocol;
 
 void setup_dccex()
 {
@@ -27,4 +25,14 @@ void setup_dccex()
     dccexProtocol.requestServerVersion();
 
     dccexProtocol.getLists(false, true, false, false);
+}
+
+void check_dccex_connection()
+{
+    if (!client.connected())
+    {
+        Serial.println("DCC-EX server connection lost, attempting to reconnect...");
+        networkLed.setColor(YELLOW);
+        setup_dccex();
+    }
 }

@@ -1,10 +1,12 @@
 #include "setup_dccex.h"
 
-extern RGBLed networkLed;
-extern WiFiClient client;
+RGBLed networkLed(25, 26, 27);
+WiFiClient client;
 
 void setup_wifi()
 {
+    networkLed.setColor(RED);
+
     Serial.println("\n--- Connecting to Wi-Fi ---");
     // Start the Wi-Fi connection process
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);

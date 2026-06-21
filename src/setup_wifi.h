@@ -10,6 +10,9 @@
 
 #include "config.h"
 
+extern RGBLed networkLed;
+extern WiFiClient client;
+
 void setup_wifi();
 
 #endif
