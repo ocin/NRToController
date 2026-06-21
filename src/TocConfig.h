@@ -4,6 +4,8 @@
 #include <LittleFS.h>
 #include <ArduinoJson.h>
 
+#include "TocLog.h"
+
 class TocConfig
 {
 public:
@@ -16,6 +18,6 @@ public:
     TocConfig();
     void begin();
     void save(const char *new_host, int new_port, int const *new_turnoutid);
-    void dumpToSerial();
+    void dumpTotoclog();
     int getTurnoutId(int tocnum);
 };

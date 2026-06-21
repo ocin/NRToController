@@ -27,7 +27,7 @@ void TocConfig::begin()
 
     // 2. Initialize LittleFS with formatOnFail set to true
     if (!LittleFS.begin(true)) {
-        Serial.println("[Config] LittleFS Mount Failed entirely.");
+        toclog.println("[Config] LittleFS Mount Failed entirely.");
         return;
     }
 
@@ -42,13 +42,13 @@ void TocConfig::begin()
                 for (int i = 0; i < NUM_TURNOUTS; i++) {
                     turnoutid_mappings[i] = doc["turnoutid"][i] | turnoutid_mappings[i];
                 }
-                Serial.println("[Config] Settings successfully loaded from LittleFS.");
+                toclog.println("[Config] Settings successfully loaded from LittleFS.");
             }
             configFile.close();
         }
     } else {
         // First boot scenario: Create the file immediately using your defaults
-        Serial.println("[Config] turnouts.json not found. Initializing default file...");
+        toclog.println("[Config] turnouts.json not found. Initializing default file...");
         
         // Pass dummy parameters matching current in-memory configurations to initialize the file
         save(dcc_host, dcc_port, turnoutid_mappings); 
@@ -86,25 +86,25 @@ void TocConfig::save(const char *new_host, int new_port, int const *new_turnouti
     {
         serializeJson(doc, configFile);
         configFile.close();
-        Serial.println("[Config] Settings successfully saved to Flash.");
+        toclog.println("[Config] Settings successfully saved to Flash.");
     }
     else
     {
-        Serial.println("[Config] Error opening LittleFS file for writing.");
+        toclog.println("[Config] Error opening LittleFS file for writing.");
     }
 }
 
-// Debug print utility to view settings via Serial Monitor
-void TocConfig::dumpToSerial()
+// Debug print utility to view settings via toclog Monitor
+void TocConfig::dumpTotoclog()
 {
-    Serial.printf("\n--- Toc Configuration Profile ---\n");
-    Serial.printf("DCC-EX Host: %s\n", dcc_host);
-    Serial.printf("DCC-EX Port: %d\n", dcc_port);
+    toclog.printf("\n--- Toc Configuration Profile ---\n");
+    toclog.printf("DCC-EX Host: %s\n", dcc_host);
+    toclog.printf("DCC-EX Port: %d\n", dcc_port);
     for (int i = 0; i < NUM_TURNOUTS; i++)
     {
-        Serial.printf("Turnout Controller %d -> Turnout Id: %d\n", i + 1, turnoutid_mappings[i]);
+        toclog.printf("Turnout Controller %d -> Turnout Id: %d\n", i + 1, turnoutid_mappings[i]);
     }
-    Serial.println("------------------------------------");
+    toclog.println("------------------------------------");
 }
 
 /**
@@ -118,7 +118,7 @@ int TocConfig::getTurnoutId(int tocnum) {
 
     // Boundary check: Ensure the requested number fits our hardcoded array limit
     if (arrayIndex < 0 || arrayIndex >= NUM_TURNOUTS) {
-        Serial.printf("[Config] Warning: Requested turnout number %d is out of bounds!\n", tocnum);
+        toclog.printf("[Config] Warning: Requested turnout number %d is out of bounds!\n", tocnum);
         return 0; 
     }
 

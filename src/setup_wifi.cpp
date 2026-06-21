@@ -45,7 +45,7 @@ void setup_wm() {
 
   // 5. Run the interface portal
   if (!wm.autoConnect("Toc_Manager")) {
-    Serial.println("Portal timed out. Restarting...");
+    toclog.println("Portal timed out. Restarting...");
     delay(3000);
     ESP.restart();
   }
@@ -71,7 +71,7 @@ void setup_wm() {
   }
 
   // Print summary verifying successful config extraction
-  tocConfig.dumpToSerial();
+  tocConfig.dumpTotoclog();
 }
 
 void setup_wifi()
@@ -79,7 +79,7 @@ void setup_wifi()
     networkLed.setColor(RED);
 
 #ifdef WIFI_SSID
-    Serial.println("\n--- Connecting to Wi-Fi ---");
+    toclog.println("\n--- Connecting to Wi-Fi ---");
     // Start the Wi-Fi connection process
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
@@ -92,13 +92,13 @@ void setup_wifi()
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
-        Serial.print("."); // Visual loading indicator
+        toclog.print("."); // Visual loading indicator
     }
 
     // Connection successful
-    Serial.println("\nWi-Fi Connected!");
-    Serial.print("IP Address: ");
-    Serial.println(WiFi.localIP());
+    toclog.println("\nWi-Fi Connected!");
+    toclog.print("IP Address: ");
+    toclog.println(WiFi.localIP());
 #endif
 
     setup_wm();

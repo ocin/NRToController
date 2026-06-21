@@ -7,12 +7,13 @@
 #include "setup_wifi.h"
 #include "setup_dccex.h"
 #include "setup_webserver.h"
+#include "TocLog.h"
 
 void setup()
 {
     Serial.begin(115200);
     delay(1000);
-    Serial.println("ESP32 Serial Initialized!");
+    toclog.println("ESP32 toclog Initialized!");
 
     setup_wifi();
     setup_dccex();

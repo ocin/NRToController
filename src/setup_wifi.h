@@ -1,5 +1,4 @@
-#ifndef SETUP_WIFI_H
-#define SETUP_WIFI_H
+#pragma once
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -12,11 +11,10 @@
 
 #include "config.h"
 #include "TocConfig.h"
+#include "TocLog.h"
 
 extern RGBLed networkLed;
 extern WiFiClient client;
 extern TocConfig tocConfig;
 
 void setup_wifi();
-
-#endif

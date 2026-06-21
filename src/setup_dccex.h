@@ -1,5 +1,4 @@
-#ifndef SETUP_DCCEX_H
-#define SETUP_DCCEX_H
+#pragma once
 
 #include <Arduino.h>
 #include <DCCEXProtocol.h>
@@ -12,11 +11,10 @@
 #include "config.h"
 #include "TocDelegate.h"
 #include "TocConfig.h"
+#include "TocLog.h"
 #include "setup_wifi.h"
 
 extern DCCEXProtocol dccexProtocol;
 
 void setup_dccex();
 void check_dccex_connection();
-
-#endif

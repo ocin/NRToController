@@ -1,6 +1,7 @@
 
-#ifndef TURNOUT_CONTROLLER_H
-#define TURNOUT_CONTROLLER_H
+#pragma once
+
+#include "TocLog.h"
 
 // Do not set this high or you will electrocute your turnout!
 #define TU_POWER_TIME 50
@@ -16,5 +17,3 @@ class TurnoutController
         int _closePort;
         int _thrownPort;
 };
-
-#endif

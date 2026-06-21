@@ -1,5 +1,4 @@
-#ifndef TOC_DELEGATE_H
-#define TOC_DELEGATE_H
+#pragma once
 
 #include <DCCEXProtocol.h>
 #include <map>
@@ -7,6 +6,7 @@
 #include "common.h"
 #include "setup_dccex.h"
 #include "TurnoutController.h"
+#include "TocLog.h"
 
 class TocDelegate : public DCCEXProtocolDelegate
 {
@@ -21,5 +21,3 @@ private:
     std::map<int, TurnoutController*> _tocMap;
     std::map<int, int> _toIdToToc;
 };
-
-#endif
