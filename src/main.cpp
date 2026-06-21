@@ -4,11 +4,14 @@
 #include <map>
 #include <DCCEXProtocol.h>
 
+#include <RGBLed.h>
+
 #include "config.h"
+#include "setup_wifi.h"
+#include "setup_dccex.h"
 #include "TurnoutController.h"
 #include "TocDelegate.h"
 #include "colors.h"
-#include "rgb_led.h"
 
 WiFiClient client;
 DCCEXProtocol dccexProtocol;
@@ -17,55 +20,6 @@ TocDelegate tocDelegate;
 RGBLed networkLed(25, 26, 27);
 
 std::map<int, TurnoutController*> tocIdMap;
-
-void setup_wifi()
-{
-    Serial.println("\n--- Connecting to Wi-Fi ---");
-    // Start the Wi-Fi connection process
-    WiFi.begin(ssid, password);
-
-    // Wifi configuration for better performance and reliability
-    esp_wifi_set_ps(WIFI_PS_NONE);
-    esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_11N);
-    esp_wifi_set_bandwidth(WIFI_IF_STA, WIFI_BW_HT20);
-
-    // Wait until the ESP32 successfully connects
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        delay(500);
-        Serial.print("."); // Visual loading indicator
-    }
-
-    // Connection successful
-    Serial.println("\nWi-Fi Connected!");
-    Serial.print("IP Address: ");
-    Serial.println(WiFi.localIP());
-    networkLed.setColor(YELLOW);
-}
-
-void setup_dccex()
-{
-    Serial.printf("Connecting to DCC-EX server %s:%d...\n", dcc_ip, dcc_port);
-    while (!client.connect(dcc_ip, dcc_port))
-    {
-        Serial.printf("DCC-EX connection failed to %s:%d, retrying...\n", dcc_ip, dcc_port);
-        delay(1000);
-    }
-
-    dccexProtocol.setLogStream(&Serial);
-
-    dccexProtocol.setDelegate(&tocDelegate);
-
-    dccexProtocol.connect(&client);
-    client.setNoDelay(true);
-    dccexProtocol.enableHeartbeat();
-    Serial.printf("Connected to the DCC-EX server %s:%d\n", dcc_ip, dcc_port);
-    networkLed.setColor(BLUE);
-
-    dccexProtocol.requestServerVersion();
-
-    dccexProtocol.getLists(false, true, false, false);
-}
 
 void setupTurnouts()
 {
