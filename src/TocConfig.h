@@ -15,6 +15,7 @@ public:
     
     TocConfig();
     void begin();
-    void save(const char *new_host, int new_port, int const *new_vpins);
+    void save(const char *new_host, int new_port, int const *new_turnoutid);
     void dumpToSerial();
+    int getTurnoutId(int tocnum);
 };

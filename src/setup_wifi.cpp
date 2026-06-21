@@ -31,16 +31,16 @@ void setup_vm() {
   char id_buffers[TocConfig::NUM_TURNOUTS][10];
   char label_buffers[TocConfig::NUM_TURNOUTS][40];
   char val_buffers[TocConfig::NUM_TURNOUTS][10];
-  WiFiManagerParameter* custom_vpins[TocConfig::NUM_TURNOUTS];
+  WiFiManagerParameter* custom_turnoutid[TocConfig::NUM_TURNOUTS];
 
   // 4. Generate the 4 UI fields (Turnout 1 to 4)
   for (int i = 0; i < TocConfig::NUM_TURNOUTS; i++) {
-    sprintf(id_buffers[i], "vpin_%d", i);
+    sprintf(id_buffers[i], "turnoutid_%d", i);
     sprintf(label_buffers[i], "Turnout Controller %d Turnout ID", i + 1);
     sprintf(val_buffers[i], "%d", tocConfig.turnoutid_mappings[i]);
     
-    custom_vpins[i] = new WiFiManagerParameter(id_buffers[i], label_buffers[i], val_buffers[i], 6);
-    wm.addParameter(custom_vpins[i]);
+    custom_turnoutid[i] = new WiFiManagerParameter(id_buffers[i], label_buffers[i], val_buffers[i], 6);
+    wm.addParameter(custom_turnoutid[i]);
   }
 
   // 5. Run the interface portal
@@ -52,22 +52,22 @@ void setup_vm() {
 
   // 6. If user submitted changes, save them using the class method
   if (shouldSaveConfig) {
-    int temp_vpins[TocConfig::NUM_TURNOUTS];
+    int temp_turnoutid[TocConfig::NUM_TURNOUTS];
     for (int i = 0; i < TocConfig::NUM_TURNOUTS; i++) {
-        temp_vpins[i] = atoi(custom_vpins[i]->getValue());
+        temp_turnoutid[i] = atoi(custom_turnoutid[i]->getValue());
     }
     
     // Pass user data directly into the class handler method
     tocConfig.save(
         custom_dcc_host.getValue(), 
         atoi(custom_dcc_port.getValue()), 
-        temp_vpins
+        temp_turnoutid
     );
   }
 
   // Clean up UI allocation heap memory space
   for (int i = 0; i < TocConfig::NUM_TURNOUTS; i++) {
-    delete custom_vpins[i];
+    delete custom_turnoutid[i];
   }
 
   // Print summary verifying successful config extraction

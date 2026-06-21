@@ -25,7 +25,7 @@ void handleRoot() {
   html += "<label>DCC-EX Port:</label>";
   html += "<input type='text' name='port' value='" + String(tocConfig.dcc_port) + "'>";
   
-  // 4 Turnout VPin Fields
+  // Turount controller to turnout ID mappings
   for (int i = 0; i < TocConfig::NUM_TURNOUTS; i++) {
     html += "<label>Turnout Controller " + String(i + 1) + " Turnout Id:</label>";
     html += "<input type='text' name='turnoutid_" + String(i) + "' value='" + String(tocConfig.turnoutid_mappings[i]) + "'>";
@@ -49,14 +49,14 @@ void handleSave() {
   int new_port = webserver.arg("port").toInt();
   
   // Extract Turnout maps from post parameters
-  int temp_vpins[TocConfig::NUM_TURNOUTS];
+  int temp_turnoutid[TocConfig::NUM_TURNOUTS];
   for (int i = 0; i < TocConfig::NUM_TURNOUTS; i++) {
-    String param_name = "vpin_" + String(i);
-    temp_vpins[i] = webserver.arg(param_name).toInt();
+    String param_name = "turnoutid_" + String(i);
+    temp_turnoutid[i] = webserver.arg(param_name).toInt();
   }
 
   // Save everything directly through your C++ configuration class
-  tocConfig.save(new_host.c_str(), new_port, temp_vpins);
+  tocConfig.save(new_host.c_str(), new_port, temp_turnoutid);
 
   // Send a confirmation page back to user browser screen
   String resp = "<html><body><h2>Settings Saved Successfully!</h2><p>Rebooting device...</p>";

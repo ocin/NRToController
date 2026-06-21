@@ -14,7 +14,7 @@ public:
     void receivedServerVersion(int major, int minor, int patch) override;
     void receivedTurnoutList() override;
     void receivedTurnoutAction(int turnoutId, bool thrown) override;
-    void initPorts();
+    void initTocs();
 private:
     void initTurnouts();
     TurnoutController *getTocById(int);

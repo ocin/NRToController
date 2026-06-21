@@ -6,7 +6,6 @@ TocConfig::TocConfig()
     strncpy(dcc_host, "dcc-ex.local", sizeof(dcc_host));
     dcc_port = 2560;
 
-    // Initialize default VPins (100 to 103)
     for (int i = 0; i < NUM_TURNOUTS; i++)
     {
         turnoutid_mappings[i] = 100 + i;
@@ -41,7 +40,7 @@ void TocConfig::begin()
             DeserializationError error = deserializeJson(doc, configFile);
             if (!error) {
                 for (int i = 0; i < NUM_TURNOUTS; i++) {
-                    turnoutid_mappings[i] = doc["vpins"][i] | turnoutid_mappings[i];
+                    turnoutid_mappings[i] = doc["turnoutid"][i] | turnoutid_mappings[i];
                 }
                 Serial.println("[Config] Settings successfully loaded from LittleFS.");
             }
@@ -57,14 +56,14 @@ void TocConfig::begin()
 }
 
 // Saves all current in-memory parameters to flash storage
-void TocConfig::save(const char *new_host, int new_port, int const *new_vpins)
+void TocConfig::save(const char *new_host, int new_port, int const *new_turnoutid)
 {
     // Update in-memory variables
     strncpy(dcc_host, new_host, sizeof(dcc_host));
     dcc_port = new_port;
     for (int i = 0; i < NUM_TURNOUTS; i++)
     {
-        turnoutid_mappings[i] = new_vpins[i];
+        turnoutid_mappings[i] = new_turnoutid[i];
     }
 
     // 1. Save Host and Port to Preferences
@@ -76,10 +75,10 @@ void TocConfig::save(const char *new_host, int new_port, int const *new_vpins)
 
     // 2. Save Turnout Array to LittleFS JSON
     JsonDocument doc;
-    JsonArray vpinsNode = doc["vpins"].to<JsonArray>();
+    JsonArray turnoutidNode = doc["turnoutid"].to<JsonArray>();
     for (int i = 0; i < NUM_TURNOUTS; i++)
     {
-        vpinsNode.add(turnoutid_mappings[i]);
+        turnoutidNode.add(turnoutid_mappings[i]);
     }
 
     File configFile = LittleFS.open("/turnouts.json", "w");
@@ -106,4 +105,29 @@ void TocConfig::dumpToSerial()
         Serial.printf("Turnout Controller %d -> Turnout Id: %d\n", i + 1, turnoutid_mappings[i]);
     }
     Serial.println("------------------------------------");
+}
+
+/**
+ * Gets the DCC Turnout ID based on the controller turnout number.
+ * @param tocnum The turnout label number (1 to 4)
+ * @return The assigned Turnout ID, or 0 if out of bounds / unconfigured.
+ */
+int TocConfig::getTurnoutId(int tocnum) {
+    // Convert 1-based human label (1-4) to 0-based array index (0-3)
+    int arrayIndex = tocnum - 1;
+
+    // Boundary check: Ensure the requested number fits our hardcoded array limit
+    if (arrayIndex < 0 || arrayIndex >= NUM_TURNOUTS) {
+        Serial.printf("[Config] Warning: Requested turnout number %d is out of bounds!\n", tocnum);
+        return 0; 
+    }
+
+    int turnoutId = turnoutid_mappings[arrayIndex];
+
+    // Optional: Return 0 if the value is explicitly unconfigured or negative
+    if (turnoutId <= 0) {
+        return 0;
+    }
+
+    return turnoutId;
 }

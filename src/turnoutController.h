@@ -13,7 +13,7 @@ class TurnoutController
         void setThrown();
     private:
         int _id;
-        int _closedPort;
+        int _closePort;
         int _thrownPort;
 };
 
