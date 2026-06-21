@@ -14,6 +14,8 @@ void setup_dccex()
 
     dccexProtocol.setLogStream(&Serial);
 
+    tocDelegate.initPorts();
+
     dccexProtocol.setDelegate(&tocDelegate);
 
     dccexProtocol.connect(&client);
