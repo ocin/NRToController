@@ -1,7 +1,78 @@
 #include "setup_dccex.h"
+#include "setup_webserver.h"
 
 RGBLed networkLed(25, 26, 27);
 WiFiClient client;
+
+TocConfig tocConfig; // Create instance of your configuration class
+bool shouldSaveConfig = false;
+
+void saveConfigCallback() {
+  shouldSaveConfig = true;
+}
+
+void setup_vm() {
+      // 1. Initialize configuration and load saved variables
+  tocConfig.begin();
+
+  WiFiManager wm;
+  wm.setSaveConfigCallback(saveConfigCallback);
+
+  // 2. Setup standard host and port HTML input elements
+  char port_str[6];
+  sprintf(port_str, "%d", tocConfig.dcc_port);
+  
+  WiFiManagerParameter custom_dcc_host("host", "DCC-EX Host/IP", tocConfig.dcc_host, 40);
+  WiFiManagerParameter custom_dcc_port("port", "DCC-EX Port", port_str, 6);
+  wm.addParameter(&custom_dcc_host);
+  wm.addParameter(&custom_dcc_port);
+
+  // 3. Create dynamic storage strings for UI generation
+  char id_buffers[TocConfig::NUM_TURNOUTS][10];
+  char label_buffers[TocConfig::NUM_TURNOUTS][40];
+  char val_buffers[TocConfig::NUM_TURNOUTS][10];
+  WiFiManagerParameter* custom_vpins[TocConfig::NUM_TURNOUTS];
+
+  // 4. Generate the 4 UI fields (Turnout 1 to 4)
+  for (int i = 0; i < TocConfig::NUM_TURNOUTS; i++) {
+    sprintf(id_buffers[i], "vpin_%d", i);
+    sprintf(label_buffers[i], "Turnout Controller %d Turnout ID", i + 1);
+    sprintf(val_buffers[i], "%d", tocConfig.turnoutid_mappings[i]);
+    
+    custom_vpins[i] = new WiFiManagerParameter(id_buffers[i], label_buffers[i], val_buffers[i], 6);
+    wm.addParameter(custom_vpins[i]);
+  }
+
+  // 5. Run the interface portal
+  if (!wm.autoConnect("Toc_Manager")) {
+    Serial.println("Portal timed out. Restarting...");
+    delay(3000);
+    ESP.restart();
+  }
+
+  // 6. If user submitted changes, save them using the class method
+  if (shouldSaveConfig) {
+    int temp_vpins[TocConfig::NUM_TURNOUTS];
+    for (int i = 0; i < TocConfig::NUM_TURNOUTS; i++) {
+        temp_vpins[i] = atoi(custom_vpins[i]->getValue());
+    }
+    
+    // Pass user data directly into the class handler method
+    tocConfig.save(
+        custom_dcc_host.getValue(), 
+        atoi(custom_dcc_port.getValue()), 
+        temp_vpins
+    );
+  }
+
+  // Clean up UI allocation heap memory space
+  for (int i = 0; i < TocConfig::NUM_TURNOUTS; i++) {
+    delete custom_vpins[i];
+  }
+
+  // Print summary verifying successful config extraction
+  tocConfig.dumpToSerial();
+}
 
 void setup_wifi()
 {
@@ -28,4 +99,7 @@ void setup_wifi()
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
     networkLed.setColor(YELLOW);
+
+    setup_vm();
+    setup_webserver();
 }

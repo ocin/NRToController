@@ -6,6 +6,7 @@
 #include "config.h"
 #include "setup_wifi.h"
 #include "setup_dccex.h"
+#include "setup_webserver.h"
 
 void setup()
 {
@@ -22,4 +23,6 @@ void loop()
     dccexProtocol.check();
 
     check_dccex_connection();
+
+    webserver.handleClient();
 }
