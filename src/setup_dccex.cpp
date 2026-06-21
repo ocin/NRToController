@@ -5,10 +5,19 @@ DCCEXProtocol dccexProtocol;
 
 void setup_dccex()
 {
-    Serial.printf("Connecting to DCC-EX server %s:%d...\n", DCCEX_HOSTNAME, DCCEX_PORT);
-    while (!client.connect(DCCEX_HOSTNAME, DCCEX_PORT))
+    char dcc_host[40];
+    int dcc_port = tocConfig.dcc_port;
+    strncpy(dcc_host, tocConfig.dcc_host, sizeof(dcc_host));
+
+#ifdef DCCEX_HOSTNAME
+    dcc_host = DCCEX_HOSTNAME;
+    dcc_port = DCCEX_PORT;
+#endif
+
+    Serial.printf("Connecting to DCC-EX server %s:%d...\n", dcc_host, dcc_port);
+    while (!client.connect(dcc_host, dcc_port))
     {
-        Serial.printf("DCC-EX connection failed to %s:%d, retrying...\n", DCCEX_HOSTNAME, DCCEX_PORT);
+        Serial.printf("DCC-EX connection failed to %s:%d, retrying...\n", dcc_host, dcc_port);
         delay(1000);
     }
 
@@ -21,7 +30,7 @@ void setup_dccex()
     dccexProtocol.connect(&client);
     client.setNoDelay(true);
     dccexProtocol.enableHeartbeat();
-    Serial.printf("Connected to the DCC-EX server %s:%d\n", DCCEX_HOSTNAME, DCCEX_PORT);
+    Serial.printf("Connected to the DCC-EX server %s:%d\n", dcc_host, dcc_port);
     networkLed.setColor(BLUE);
 
     dccexProtocol.requestServerVersion();

@@ -80,10 +80,10 @@ void TocDelegate::initTocs()
             Serial.printf("[initTocs] Turnout controller %d is not defined, skipping\n", tocnum);
         }
     }
-    _tocMap.insert(std::make_pair(1, new TurnoutController(1, 12, 13)));
-    _tocMap.insert(std::make_pair(2, new TurnoutController(2, 16, 17)));
-    _tocMap.insert(std::make_pair(3, new TurnoutController(3, 18, 19)));
-    _tocMap.insert(std::make_pair(4, new TurnoutController(4, 21, 22)));
+    _tocMap.insert(std::make_pair(1, new TurnoutController(1, TOC_1_CLOSE_PORT, TOC_1_THROWN_PORT)));
+    _tocMap.insert(std::make_pair(2, new TurnoutController(2, TOC_2_CLOSE_PORT, TOC_2_THROWN_PORT)));
+    _tocMap.insert(std::make_pair(3, new TurnoutController(3, TOC_3_CLOSE_PORT, TOC_3_THROWN_PORT)));
+    _tocMap.insert(std::make_pair(4, new TurnoutController(4, TOC_4_CLOSE_PORT, TOC_4_THROWN_PORT)));
 }
 
 TurnoutController *TocDelegate::getTocById(int turnoutId)

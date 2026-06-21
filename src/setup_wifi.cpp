@@ -11,7 +11,7 @@ void saveConfigCallback() {
   shouldSaveConfig = true;
 }
 
-void setup_vm() {
+void setup_wm() {
       // 1. Initialize configuration and load saved variables
   tocConfig.begin();
 
@@ -78,6 +78,7 @@ void setup_wifi()
 {
     networkLed.setColor(RED);
 
+#ifdef WIFI_SSID
     Serial.println("\n--- Connecting to Wi-Fi ---");
     // Start the Wi-Fi connection process
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -98,8 +99,11 @@ void setup_wifi()
     Serial.println("\nWi-Fi Connected!");
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
+#endif
+
+    setup_wm();
+
     networkLed.setColor(YELLOW);
 
-    setup_vm();
     setup_webserver();
 }

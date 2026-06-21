@@ -8,7 +8,7 @@ TocConfig::TocConfig()
 
     for (int i = 0; i < NUM_TURNOUTS; i++)
     {
-        turnoutid_mappings[i] = 100 + i;
+        turnoutid_mappings[i] = 101 + i;
     }
 }
 
@@ -20,7 +20,7 @@ void TocConfig::begin()
     Preferences preferences;
     preferences.begin("dcc-config", false); 
     
-    String savedHost = preferences.getString("dcc_host", "dcc-ex.local");
+    String savedHost = preferences.getString("dcc_host", "dccex.local");
     savedHost.toCharArray(dcc_host, sizeof(dcc_host));
     dcc_port = preferences.getInt("dcc_port", 2560);
     preferences.end();

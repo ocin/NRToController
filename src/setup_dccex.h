@@ -11,6 +11,7 @@
 
 #include "config.h"
 #include "TocDelegate.h"
+#include "TocConfig.h"
 #include "setup_wifi.h"
 
 extern DCCEXProtocol dccexProtocol;
