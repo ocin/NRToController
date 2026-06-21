@@ -16,7 +16,9 @@ TurnoutController::TurnoutController(int id, int closedPort, int thrownPort) {
 }
 
 void TurnoutController::setClose() {
+#ifdef DEBUG
     Serial.printf("[Turnout Update] Update turnout controller \"%d\" to CLOSE\n", _id);
+#endif
 
     digitalWrite(_closedPort, HIGH);
     delay(TU_POWER_TIME);
@@ -24,7 +26,9 @@ void TurnoutController::setClose() {
 }
 
 void TurnoutController::setThrown() {
+#ifdef DEBUG
     Serial.printf("[Turnout Update] Update turnout controller \"%d\" to THROWN\n", _id);
+#endif
 
     digitalWrite(_thrownPort, HIGH);
     delay(TU_POWER_TIME);

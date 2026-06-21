@@ -5,6 +5,7 @@
 #include <map>
 
 #include "common.h"
+#include "setup_dccex.h"
 #include "TurnoutController.h"
 
 class TocDelegate : public DCCEXProtocolDelegate

@@ -13,7 +13,6 @@
 #include "TocDelegate.h"
 #include "setup_wifi.h"
 
-extern TocDelegate tocDelegate;
 extern DCCEXProtocol dccexProtocol;
 
 void setup_dccex();
