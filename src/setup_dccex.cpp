@@ -5,6 +5,7 @@ DCCEXProtocol dccexProtocol;
 
 void setup_dccex()
 {
+    int retries = 0;
     char dcc_host[40];
     int dcc_port = tocConfig.dcc_port;
     strncpy(dcc_host, tocConfig.dcc_host, sizeof(dcc_host));
@@ -15,10 +16,11 @@ void setup_dccex()
 #endif
 
     toclog.printf("Connecting to DCC-EX server %s:%d...\n", dcc_host, dcc_port);
-    while (!client.connect(dcc_host, dcc_port))
+    while (!client.connect(dcc_host, dcc_port) && retries <= 10)
     {
         toclog.printf("DCC-EX connection failed to %s:%d, retrying...\n", dcc_host, dcc_port);
         delay(1000);
+        retries++;
     }
 
     dccexProtocol.setLogStream(&Serial);
