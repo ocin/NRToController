@@ -3,14 +3,20 @@
 #include "common.h"
 #include "TurnoutController.h"
 
-TurnoutController::TurnoutController(int id, int closePort, int thrownPort) {
+TurnoutController::TurnoutController(int id, int enablePort, int closePort, int thrownPort) {
     _id = id;
 
+    _enablePort = enablePort;
     _closePort = closePort;
     _thrownPort = thrownPort;
 
+    pinMode(_enablePort, OUTPUT);
+    digitalWrite(_enablePort, LOW);
+
     pinMode(_closePort, OUTPUT);
     pinMode(_thrownPort, OUTPUT);
+    digitalWrite(_thrownPort, LOW);
+    digitalWrite(_closePort, LOW);
 
     toclog.printf("[Turnout Init] Initialize turnout controller \"%d\"\n", _id);
 }
@@ -21,8 +27,14 @@ void TurnoutController::setClose() {
 #endif
 
     digitalWrite(_closePort, HIGH);
+    digitalWrite(_thrownPort, LOW);
+
+    digitalWrite(_enablePort, HIGH);
     delay(TU_POWER_TIME);
+    digitalWrite(_enablePort, LOW);
+
     digitalWrite(_closePort, LOW);
+    digitalWrite(_thrownPort, LOW);
 }
 
 void TurnoutController::setThrown() {
@@ -31,6 +43,12 @@ void TurnoutController::setThrown() {
 #endif
 
     digitalWrite(_thrownPort, HIGH);
+    digitalWrite(_closePort, LOW);
+
+    digitalWrite(_enablePort, HIGH);
     delay(TU_POWER_TIME);
+    digitalWrite(_enablePort, LOW);
+
     digitalWrite(_thrownPort, LOW);
+    digitalWrite(_closePort, LOW);
 }
