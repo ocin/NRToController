@@ -17,4 +17,6 @@ class TurnoutController
         int _enablePort;
         int _closePort;
         int _thrownPort;
+        void _activatePorts();
+        void _deactivatePorts();
 };
