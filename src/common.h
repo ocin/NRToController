@@ -5,8 +5,8 @@
 
 #define ENABLE_SERIAL 1
 
-#define TOC_1_CLOSE_PORT 12
-#define TOC_1_THROWN_PORT 13
+#define TOC_1_CLOSE_PORT 32
+#define TOC_1_THROWN_PORT 33
 #define TOC_2_CLOSE_PORT 16
 #define TOC_2_THROWN_PORT 17
 #define TOC_3_CLOSE_PORT 18
