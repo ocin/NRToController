@@ -1,8 +1,4 @@
-#include <map>
-
 #include "TocDelegate.h"
-#include "TurnoutController.h"
-#include "common.h"
 
 void TocDelegate::receivedServerVersion(int major, int minor, int patch)
 {

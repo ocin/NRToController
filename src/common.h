@@ -1,6 +1,4 @@
-#ifndef COMMON_H
-#define COMMON_H
-
+#pragma once
 //#define DEBUG 1 
 
 #define ENABLE_SERIAL 1
@@ -13,5 +11,3 @@
 #define TOC_3_THROWN_PORT 19
 #define TOC_4_CLOSE_PORT 21
 #define TOC_4_THROWN_PORT 22
-
-#endif
